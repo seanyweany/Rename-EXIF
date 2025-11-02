@@ -12,13 +12,15 @@ import (
 )
 
 func main() {
-    files, err := filepath.Glob("*.JPG")
+    files, err := filepath.Glob("*.*")
     if err != nil {
         log.Fatal(err)
     }
 
-    // Loop through each JPG file
+    // Loop through each file
     for _, file := range files {
+        ext := filepath.Ext(file)      // Get the original extension
+
         cmd := exec.Command("exiftool", "-DateTimeOriginal", file)
         out, err := cmd.CombinedOutput()
         if err != nil {
@@ -49,7 +51,7 @@ func main() {
 
         // PDT = UTC-07:00
         // PST = UTC-08:00
-        hour -= 8
+        hour -= 0
         //minute += 30
 
         // Normalize time
@@ -64,17 +66,10 @@ func main() {
         }
 
         // Generate the new filename
-        newFilename := fmt.Sprintf("%d%02d%02d_%02d%02d%02d.jpg", year, month, day, hour, minute, second)
+        newFilename := fmt.Sprintf("%d%02d%02d_%02d%02d%02d", year, month, day, hour, minute, second) + ext
 
-        // Rename the JPG file
+        // Rename the file
         err = os.Rename(file, newFilename)
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        // Rename the .NEF file
-        nefFile := strings.TrimSuffix(file, ".JPG") + ".NEF"
-        err = os.Rename(nefFile, strings.TrimSuffix(newFilename, ".jpg") + ".NEF")
         if err != nil {
             log.Fatal(err)
         }
@@ -82,7 +77,7 @@ func main() {
         // Check if there are duplicate filenames and rename them
         count := 2
         for fileExists(newFilename) {
-            newFilename = fmt.Sprintf("%d%02d%02d_%02d%02d%02d_%d.jpg", year, month, day, hour, minute, second, count)
+            newFilename = fmt.Sprintf("%d%02d%02d_%02d%02d%02d_%d", year, month, day, hour, minute, second, count) + ext
             count++
         }
     }
