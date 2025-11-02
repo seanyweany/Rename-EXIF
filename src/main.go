@@ -19,7 +19,7 @@ func main() {
 
     // Loop through each file
     for _, file := range files {
-        ext := filepath.Ext(file)      // Get the original extension
+        ext := filepath.Ext(file)
 
         cmd := exec.Command("exiftool", "-DateTimeOriginal", file)
         out, err := cmd.CombinedOutput()
@@ -81,6 +81,10 @@ func main() {
             count++
         }
     }
+
+    // Temp fix for the lack of a proper interface
+    fmt.Printf("\nPress ENTER")
+    fmt.Scanln()
 }
 
 func fileExists(filename string) bool {
