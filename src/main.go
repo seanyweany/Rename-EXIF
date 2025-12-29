@@ -2,7 +2,6 @@ package main
 
 import (
     "fmt"
-    "log"
     "os"
     "os/exec"
     "path/filepath"
@@ -11,20 +10,29 @@ import (
     "strconv"
 )
 
+const VERSION string = "v1.1.0"
+
+func header() {
+    fmt.Printf("-=Rename-EXIF %s=-\n\n", VERSION)
+}
+
 func main() {
+    header()
+
     files, err := filepath.Glob("*.*")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("ERROR reading current directory! [%s]\n", err)
     }
 
     // Loop through each file
     for _, file := range files {
         ext := filepath.Ext(file)
 
+        // DateTimeOriginal!
         cmd := exec.Command("exiftool", "-DateTimeOriginal", file)
         out, err := cmd.CombinedOutput()
         if err != nil {
-            fmt.Printf("Command failed: %s\n", err)
+            fmt.Printf("ERROR! Command failed! [%s]\n", err)
             fmt.Printf("Output: %s\n", out)
         }
 
@@ -33,7 +41,7 @@ func main() {
         match := re.FindString(string(out))
 
         if match == "" {
-            log.Printf("No DateTimeOriginal metadata found for file: %s\n", file)
+            fmt.Printf("No DateTimeOriginal metadata found for file: %s\n", file)
             continue
         }
 
@@ -71,7 +79,7 @@ func main() {
         // Rename the file
         err = os.Rename(file, newFilename)
         if err != nil {
-            log.Fatal(err)
+            fmt.Printf("ERROR renaming file \"%s\"! [%s]\n", file, err)
         }
 
         // Check if there are duplicate filenames and rename them
